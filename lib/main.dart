@@ -14,13 +14,14 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool isDarkMode = false;
+  Profile user = Profile();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Widget Demo',
       theme: isDarkMode ? darkMode : lightMode,
-      home: HomeScreen(toggleTheme: toggleTheme,),
+      home: HomeScreen(toggleTheme: toggleTheme,user: user),
     );
   }
 
@@ -33,8 +34,9 @@ class _MyAppState extends State<MyApp> {
 
 class HomeScreen extends StatelessWidget {
   final VoidCallback toggleTheme;
+  final Profile user;
 
-  const HomeScreen({super.key, required this.toggleTheme});
+  const HomeScreen({super.key, required this.toggleTheme, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +72,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ProfileScreen()),
+                  MaterialPageRoute(builder: (context) => ProfileScreen(user: user)),
                 );
               }, 
               child: const Text('View Profile', style: TextStyle(fontSize:18, fontWeight:FontWeight.w500)),
@@ -82,9 +84,16 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  final Profile user;
+  
+  const ProfileScreen({super.key, required this.user});
 
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,7 +101,19 @@ class ProfileScreen extends StatelessWidget {
         title: Align(
           alignment: Alignment.centerLeft, // Align the title to the left
           child: const Text('My Profile', style: TextStyle(fontWeight: FontWeight.w600)),
-        )
+        ),
+        actions:[
+          IconButton(
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EditProfileScreen(user: widget.user)),
+              );
+              setState(() {}); // <<< Rebuild after coming back from Edit
+            },
+            icon: Icon(Icons.edit),
+          )
+        ] 
       ),
 
       body: Center(
@@ -103,23 +124,23 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 10),
               child: CircleAvatar(
                 radius: 50,  // Adjust the size of the avatar
-                backgroundImage: AssetImage('assets/flowers.jpg'), // Image URL
+                backgroundImage: AssetImage('assets/${widget.user.profilePicture}.jpg'), // Image URL
                 backgroundColor: Colors.grey,  // Background color if the image fails to load
               ),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: const Text(
-                'John Doe',
+              child: Text(
+                widget.user.profileName,
                 style: TextStyle(fontSize:24, fontWeight: FontWeight.w800),
               ),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child:const Opacity(
+              child: Opacity(
                 opacity: 0.7,
                 child: Text(
-                  'Flutter Developer | CS Student',
+                  '${widget.user.devType} Developer | ${widget.user.major} Student',
                   style: TextStyle(fontSize:14, fontWeight: FontWeight.w300),
                 ),
               ),
@@ -132,6 +153,210 @@ class ProfileScreen extends StatelessWidget {
             )
           ],
         ),
+      ),
+    );
+  }
+}
+
+class EditProfileScreen extends StatefulWidget {
+  final Profile user;
+  
+  const EditProfileScreen({super.key, required this.user});
+
+  @override
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  late TextEditingController nameController;
+  late TextEditingController devTypeController;
+  late TextEditingController majorController;
+
+  int choiceNum = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController(text: widget.user.profileName);
+    devTypeController = TextEditingController(text: widget.user.devType);
+    majorController = TextEditingController(text: widget.user.major);
+    choiceNum = widget.user.profilePictureChoice;
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    devTypeController.dispose();
+    majorController.dispose();
+    super.dispose();
+  }
+
+  void saveProfile() {
+    setState(() {
+      widget.user.set(
+        choiceNum,
+        nameController.text,
+        devTypeController.text,
+        majorController.text,
+      );
+    });
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Align(
+          alignment: Alignment.centerLeft, // Align the title to the left
+          child: const Text('Edit Profile', style: TextStyle(fontWeight: FontWeight.w600)),
+        )
+      ),
+
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+
+            // Image options
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ProfileIconOption(image: 'flower', number: '1'),
+                  ProfileIconOption(image: 'spaceship', number: '2'),
+                  ProfileIconOption(image: 'car', number: '3')
+                ]
+              ),
+            ),
+
+            // Dropdown for selecting profile picture
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              child: DropdownButton<int>(
+                value: choiceNum,
+                onChanged: (int? newValue) {
+                  setState(() {
+                    choiceNum = newValue!;
+                  });
+                },
+                items: const [
+                  DropdownMenuItem<int>(
+                    value: 1,
+                    child: Text('Flower (1)'),
+                  ),
+                  DropdownMenuItem<int>(
+                    value: 2,
+                    child: Text('Spaceship (2)'),
+                  ),
+                  DropdownMenuItem<int>(
+                    value: 3,
+                    child: Text('Car (3)'),
+                  ),
+                ],
+                isExpanded: true,
+                hint: Text('Select Profile Picture'),
+              ),
+            ),
+
+            // Name input
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              child: TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                ),
+              ),
+            ),
+
+            // Dev type Input
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              child: TextField(
+                controller: devTypeController,
+                decoration: const InputDecoration(
+                  labelText: 'Developer Type',
+                ),
+              ),
+            ),
+
+            // Major input
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              child: TextField(
+                controller: majorController,
+                decoration: const InputDecoration(
+                  labelText: 'Major',
+                ),
+              ),
+            ),
+
+            // Save button
+            ElevatedButton(
+              onPressed: () {
+                saveProfile();
+              },  
+              child: const Text('Save', style: TextStyle(fontSize:18, fontWeight:FontWeight.w500)),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.only(left: 30, right: 30, bottom: 20),
+              child: Text(
+                '(To exit without saving changes, just tap the back button at the top)',
+                style: TextStyle(fontSize:10, fontWeight: FontWeight.w300),
+              ),
+            ), 
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class Profile{
+  int profilePictureChoice = 1;
+  String profilePicture = 'flower';
+  String profileName = "John Doe";
+  String devType = "Flutter";
+  String major = "CS";
+
+  set(int choice, String name, String dev, String maj){
+    profilePictureChoice = choice;
+    switch (choice){
+      case 2: profilePicture = 'spaceship';
+      break;
+      case 3: profilePicture = 'car';
+      break;
+      default: profilePicture = 'flower';
+    }
+    profileName = name;
+    devType = dev;
+    major = maj;
+  }
+}
+
+class ProfileIconOption extends StatelessWidget {
+  final String image;
+  final String number;
+  
+  const ProfileIconOption({super.key, required this.image, required this.number});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10), 
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget> [
+          CircleAvatar(
+            radius: 50,  // Adjust the size of the avatar
+            backgroundImage: AssetImage('assets/${image}.jpg'), // Image URL
+            backgroundColor: Colors.grey,  // Background color if the image fails to load
+          ),
+          Text('${number}')
+        ]
       ),
     );
   }
