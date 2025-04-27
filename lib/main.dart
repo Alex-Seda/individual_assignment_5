@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'themes.dart'; // Import the file where the themes are stored
 
 void main() {
   runApp(const MyApp());
@@ -18,29 +19,36 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Widget Demo',
-      theme: isDarkMode ? ThemeData.dark() : ThemeData.light(),
-      home: const HomeScreen(),
+      theme: isDarkMode ? darkMode : lightMode,
+      home: HomeScreen(toggleTheme: toggleTheme,),
     );
   }
 
   toggleTheme(){
-    if(isDarkMode){
-      isDarkMode = false;
-    }
-    else{
-      isDarkMode = true;
-    }
+    setState(() {
+      isDarkMode = !isDarkMode;
+    });
   }
 }
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final VoidCallback toggleTheme;
+
+  HomeScreen({super.key, required this.toggleTheme});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Basic Widget')
+        title: const Text('Welcome!'),
+        actions:[
+          IconButton(
+            onPressed: () {
+              toggleTheme();
+            },
+            icon: Icon(Icons.settings),
+          )
+        ]
       ),
       body: Center(
         child: Column(
