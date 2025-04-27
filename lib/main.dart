@@ -117,10 +117,10 @@ class ProfileScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 20),
               child:const Opacity(
-                opacity: 0.5,
+                opacity: 0.7,
                 child: Text(
                   'Flutter Developer | CS Student',
-                  style: TextStyle(fontSize:12, fontWeight: FontWeight.w300),
+                  style: TextStyle(fontSize:14, fontWeight: FontWeight.w300),
                 ),
               ),
             ),
