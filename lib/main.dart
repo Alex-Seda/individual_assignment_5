@@ -4,37 +4,55 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(),
+      title: 'Flutter Widget Demo',
+      theme: isDarkMode ? ThemeData.dark() : ThemeData.light(),
+      home: const HomeScreen(),
     );
+  }
+
+  toggleTheme(){
+    if(isDarkMode){
+      isDarkMode = false;
+    }
+    else{
+      isDarkMode = true;
+    }
   }
 }
 
-class MyHomePage extends StatelessWidget{
-  const MyHomePage({super.key});
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hello World App'),
+        title: const Text('Basic Widget')
       ),
-      body: const Center(
-        child: Text(
-          'Hello World',
-          style: TextStyle(fontSize:24),
-        ), 
-      )
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'Hello flutter!',
+              style: TextStyle(fontSize:24),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
-
