@@ -84,6 +84,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+// ProfileScreen must be stateful so it can update when we come back from the profile edit menu
 class ProfileScreen extends StatefulWidget {
   final Profile user;
   
@@ -158,6 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
+// Edit Profile Screen must be stateful so you can save profile info and the content updates as you change it
 class EditProfileScreen extends StatefulWidget {
   final Profile user;
   
@@ -191,6 +193,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
+  // Function to allow us to save the fields to the user profile
   void saveProfile() {
     setState(() {
       widget.user.set(
@@ -301,6 +304,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: const Text('Save', style: TextStyle(fontSize:18, fontWeight:FontWeight.w500)),
             ),
 
+            // Explanation of how to exit without saving
             Padding(
               padding: const EdgeInsets.only(left: 30, right: 30, bottom: 20),
               child: Text(
@@ -315,6 +319,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 }
 
+// This is the class that will allow us to have a saveable profile
 class Profile{
   int profilePictureChoice = 1;
   String profilePicture = 'flower';
@@ -337,6 +342,7 @@ class Profile{
   }
 }
 
+// This class cleans up the code for Icon Options for the Profile Picture in the EditProfile screen
 class ProfileIconOption extends StatelessWidget {
   final String image;
   final String number;
